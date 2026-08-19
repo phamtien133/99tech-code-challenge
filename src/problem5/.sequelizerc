@@ -1,0 +1,12 @@
+'use strict';
+
+const path = require('path');
+
+// sequelize-cli looks for config/models/migrations in its own default layout;
+// this file is what makes `npm run db:migrate` work from the project root.
+module.exports = {
+  config: path.resolve(__dirname, 'config', 'config.js'),
+  'migrations-path': path.resolve(__dirname, 'migrations'),
+  'models-path': path.resolve(__dirname, 'src', 'models'),
+  'seeders-path': path.resolve(__dirname, 'seeders'),
+};

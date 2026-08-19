@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports: ["5439:5432"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: challenge_dev
+    volumes:
+      # Creates challenge_test on first boot. The initdb hook only runs on an
+      # empty volume, which is why `npm run db:down` uses `-v`.
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 15

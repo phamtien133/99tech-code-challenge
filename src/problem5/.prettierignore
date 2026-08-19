@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+package-lock.json
+
+# Prettier reflows the inline ports sequence into block form; the compact form is easier to read.
+docker-compose.yml
