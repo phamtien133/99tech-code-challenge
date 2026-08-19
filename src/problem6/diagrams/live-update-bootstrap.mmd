@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant C as Client
+    participant API as API
+    participant H as SSE Hub
+
+    C->>H: 1. GET /scores/stream, subscribe FIRST
+    H-->>C: stream open
+    C->>API: 2. GET /scores/leaderboard, initial snapshot
+    H-->>C: leaderboard.changed arrives while the fetch is in flight
+    C->>C: set dirty flag, do not start a second fetch
+    API-->>C: top 10 snapshot, render
+    C->>API: 3. GET /scores/leaderboard, one trailing refresh
+    API-->>C: top 10 snapshot, render, clear dirty flag
+    Note over C,H: Reconnect uses this exact same sequence.

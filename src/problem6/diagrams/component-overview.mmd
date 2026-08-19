@@ -1,0 +1,28 @@
+flowchart LR
+    subgraph Browser["Website"]
+        UI["Score board view"]
+    end
+
+    subgraph Service["API service"]
+        AUTH["Authentication middleware (existing)"]
+        R["Score routes"]
+        S["Score service"]
+        HUB["SSE hub (in-process)"]
+        V["ActionVerifier (port)"]
+        P["ScorePolicy (port)"]
+    end
+
+    OWNER["System that owns the action"]
+    DB[("PostgreSQL: score_events, user_scores")]
+
+    UI -->|"POST /scores/actions"| AUTH
+    UI -->|"GET /scores/leaderboard"| AUTH
+    UI -->|"GET /scores/stream"| AUTH
+    AUTH --> R
+    R --> S
+    S --> V
+    S --> P
+    V --> OWNER
+    S --> DB
+    S -->|"leaderboard.changed"| HUB
+    HUB -.->|"invalidation signal, no payload"| UI

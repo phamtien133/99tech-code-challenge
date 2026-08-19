@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant C as Client
+    participant API as API (Score Module)
+    participant V as ActionVerifier
+    participant P as ScorePolicy
+    participant DB as PostgreSQL
+    participant H as SSE Hub
+
+    C->>API: POST /scores/actions { actionId }
+    API->>API: Authenticate (user_id from principal, never from body)
+    API->>DB: fast path: SELECT score_event (user_id, action_id)
+    alt event already exists (retry)
+        API-->>C: 200 ScoreActionResponse (replayed true, no verifier call)
+    else not found
+        API->>V: verify(userId, actionId)
+        V-->>API: VerifiedAction (occurred AND belongs to this user)
+        API->>P: resolve(verifiedAction)
+        P-->>API: points and ruleVersion (points is a positive integer)
+        API->>DB: BEGIN
+        API->>DB: INSERT score_event ON CONFLICT DO NOTHING RETURNING id
+        alt row returned (new event)
+            API->>DB: atomic UPSERT user_scores (add points)
+            API->>DB: COMMIT
+            API->>H: emit leaderboard.changed (best-effort, NO payload)
+            API-->>C: 200 ScoreActionResponse (replayed false)
+            H-->>C: leaderboard.changed (SSE)
+            C->>API: GET /scores/leaderboard (fetch fresh, authoritative)
+        else no row (lost the race)
+            API->>DB: COMMIT
+            API-->>C: 200 ScoreActionResponse (replayed true)
+        end
+    end
