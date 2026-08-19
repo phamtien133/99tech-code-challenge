@@ -1,0 +1,29 @@
+{
+  "name": "problem4-sum-to-n",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Problem 4 - three unique TypeScript implementations of sum_to_n",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "cross-env TZ=UTC jest --runInBand",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.3.0",
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.1",
+    "typescript": "~5.9.2"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "<rootDir>/test/**/*.test.ts"
+    ]
+  }
+}
